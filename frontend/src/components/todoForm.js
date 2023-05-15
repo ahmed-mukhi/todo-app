@@ -1,43 +1,52 @@
-import { Box, Button, MenuItem, Stack, TextField } from '@mui/material';
+import { Box, Button, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
-import { SaveTodos } from '../controllers/todosControllers';
+import { SaveTodos, getTodos } from '../controllers/todosControllers';
 import FormControl from '@mui/material/FormControl';
 import { useContext } from 'react';
 import { FormContext } from '../App';
 import { grey } from '@mui/material/colors';
 
 function TodoForm() {
-    const { value, setValue, reminder, setReminder,user } = useContext(FormContext);
-    const [error, setError] = useState(false);
-    const [reminderErr, setReminErr] = useState(false);
+    const { value, setValue, reminder, setReminder, user, setChange } = useContext(FormContext);
+    const [error, setError] = useState("");
+    const [reminderErr, setReminErr] = useState("");
 
-    const handleTodo = () => {
-        setReminErr(false);
-        setError(false);
-        if (value === "") {
-            setError(true);
-        } else if (reminder === 0) {
-            console.log("ddd");
-            setReminErr(true);
-        } else {
-            SaveTodos(user._id,value, reminder);
+    const addTodo = async () => {
+        try {
+            const data = await SaveTodos(user._id, value, reminder);
+            const resp = await getTodos(data._id);
+            localStorage.setItem("data", JSON.stringify(resp.todos));
+            setChange(true);
             setValue("");
-            setReminder("");
+            setReminder(0);
             setError("");
-            setReminErr(false)
+            setReminErr("");
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const handleTodo = async () => {
+        setReminErr("");
+        setError("");
+        if (value === "" || reminder === 0) {
+            value === "" ? setError("Fill in the required field") : setReminErr("Fill in the required field");
+        } else {
+            await addTodo();
         }
     }
     return (
         <div>
-            <Box sx={{ backgroundColor: grey[200],boxShadow : "25px" }}>
+            <Box sx={{ backgroundColor: grey[200], boxShadow: "25px" }}>
                 <Stack spacing={2} sx={{ padding: '30px' }}>
                     <Box>
-                        <TextField error={error} value={value} onChange={(ev) => setValue(ev.target.value)} variant='standard' label="Enter todo" />
+                        <TextField value={value} onChange={(ev) => setValue(ev.target.value)} variant='standard' label="Enter todo" />
+                        <Typography variant='caption' display="block" sx={{ color: "red", fontSize: "small" }} gutterBottom>{error}</Typography>
                     </Box>
                     <Box>
-                        <FormControl variant="standard" error={reminderErr} sx={{ minWidth: 190 }}>
+                        <FormControl variant="standard" sx={{ minWidth: 190 }}>
                             <InputLabel id="demo-simple-select-standard-label">Reminder</InputLabel>
                             <Select
                                 label="Reminder"
@@ -50,6 +59,7 @@ function TodoForm() {
                                 <MenuItem value={2}>Necessary</MenuItem>
                                 <MenuItem value={3}>Delay</MenuItem>
                             </Select>
+                            <Typography variant='caption' sx={{ color: "red", fontSize: "small" }} gutterBottom>{reminderErr}</Typography>
                         </FormControl>
                     </Box>
                     <Box>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import '../App.css';
 import { DelTodos, getTodos } from '../controllers/todosControllers';
-import { ListItem, ListItemText, Snackbar, IconButton, Tooltip } from "@mui/material";
+import { ListItem, ListItemText, Snackbar, IconButton, Tooltip, CircularProgress } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import Skeleton from '@mui/material/Skeleton';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -10,35 +10,54 @@ import EditForm from './editForm';
 import { useContext } from 'react';
 import { FormContext } from '../App';
 const ListFormat = () => {
-    const { open, setOpen, setActive, setId, user } = useContext(FormContext);
+    const { open, setOpen, setActive, setId, user, setChange, change } = useContext(FormContext);
     const [data, setData] = useState([]);
 
     const handleClose = (ev, reason) => {
         if (reason === 'clickaway') {
             return;
         }
-
         setOpen(false);
     };
 
-    useEffect(() => {
-        if (user) {
-            getTodos(user._id).then(resp => {
-                if (resp) {
-                    setData(resp);
-                } else {
-                    console.log("ERROR_RESPONSE");
-                }
-            })
+
+    const fetchData = async () => {
+        const _data = JSON.parse(localStorage.getItem("data"));
+        if (!_data || _data.length === 0 || change) {
+            try {
+                const resp = await getTodos(user._id);
+                setData(resp.todos);
+                localStorage.setItem("data", JSON.stringify(resp.todos));
+                setChange(false);
+            } catch (error) {
+                console.log(error);
+            }
+        } else {
+            setData(_data);
         }
-    }, []);
-
-
+    };
 
     const handleThisEdit = (id) => {
         setId(id);
         setActive(true);
     }
+    const handleDel = async (id) => {
+        const resp = await DelTodos(id, user._id);
+        if (resp) {
+            setChange(true);
+            // console.log(change);
+            setOpen(true);
+        }
+    }
+
+    useEffect(() => {
+        if (user) {
+            fetchData();
+        }
+    }, [change]);
+
+
+
 
     const action = (
         <React.Fragment>
@@ -53,52 +72,47 @@ const ListFormat = () => {
         </React.Fragment>
     );
 
-    const handleDel = async (id) => {
-        let resp = await DelTodos(id);
-        setOpen(true);
-        console.log(resp);
-    }
     return (
         <div>
             <EditForm />
-            {user ? data.map((obj) => {
-                let c = 'white';
-                let date = new Date(obj.createdAt);
-                obj.reminder === 1 ? c = 'pink' : (obj.reminder === 2 ? c = 'lightblue' : c = 'white');
-                return (
-                    <div key={obj._id}>
-                        <ListItem sx={{ backgroundColor: c }}>
-                            <ListItemText primary={obj.title} secondary={date.toDateString()} />
-                            <Tooltip title="Delete">
-                                <IconButton onClick={(e) => handleDel(obj._id)}>
-                                    <DeleteIcon sx={{ ":hover": { color: "red" } }} />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Edit">
-                                <IconButton onClick={e => {
-                                    handleThisEdit(obj._id);
-                                }}>
-                                    <EditIcon sx={{ ":hover": { color: "green" } }} />
-                                </IconButton>
-                            </Tooltip>
-                            <Snackbar
-                                open={open}
-                                autoHideDuration={6000}
-                                onClose={handleClose}
-                                message="Task Deleted"
-                                action={action}
-                            />
-                        </ListItem>
+            {data && change ? <CircularProgress /> :
+                (data ? data.map((obj) => {
+                    let c = 'white';
+                    let date = new Date(obj.createdAt);
+                    obj.reminder === 1 ? c = 'pink' : (obj.reminder === 2 ? c = 'lightblue' : c = 'white');
+                    return (
+                        <div key={obj._id}>
+                            <ListItem sx={{ backgroundColor: c }}>
+                                <ListItemText primary={obj.title} secondary={date.toDateString()} />
+                                <Tooltip title="Delete">
+                                    <IconButton onClick={(e) => handleDel(obj._id)}>
+                                        <DeleteIcon sx={{ ":hover": { color: "red" } }} />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Edit">
+                                    <IconButton onClick={e => {
+                                        handleThisEdit(obj._id);
+                                    }}>
+                                        <EditIcon sx={{ ":hover": { color: "green" } }} />
+                                    </IconButton>
+                                </Tooltip>
+                                <Snackbar
+                                    open={open}
+                                    autoHideDuration={6000}
+                                    onClose={handleClose}
+                                    message="Task Deleted"
+                                    action={action}
+                                />
+                            </ListItem>
+                        </div>
+                    );
+                }) : (
+                    <div>
+                        <Skeleton sx={{ mb: 1 }} height={90} width={700} variant='rounded' />
+                        <Skeleton sx={{ mb: 1 }} height={90} width={700} variant='rounded' />
                     </div>
-                );
-            }) : (
-                <div>
-                    <Skeleton sx={{ mb: 1 }} height={90} width={700} variant='rounded' />
-                    <Skeleton sx={{ mb: 1 }} height={90} width={700} variant='rounded' />
-                    <Skeleton height={90} width={700} variant='rounded' />
-                </div>
-            )
-            }
+                ))}
+            {data.length === 0 ? <h5>No todos yet</h5> : ""}
         </div>
     );
 };

@@ -10,19 +10,26 @@ import { FormContext } from '../App';
 import { EditTodos } from '../controllers/todosControllers';
 
 const EditForm = () => {
-    let { active, setActive, id, value, user, setValue, setReminder, reminder } = useContext(FormContext);
+    let { active, setActive, id, value, setChange, setValue, setReminder, reminder } = useContext(FormContext);
 
 
     const closeDialog = () => {
         setActive(false);
+        setValue("");
+        setReminder("");
+        setChange(true);
     };
 
     const handleEdit = async () => {
         if (value === "" || reminder === 0) {
             console.log("Incomplete fields");
         } else {
-            EditTodos(id, value, reminder);
-            closeDialog();
+            try {
+                await EditTodos(id, value, reminder);
+                closeDialog();
+            } catch (error) {
+                console.log(error);
+            }
         }
     }
 
@@ -38,10 +45,9 @@ const EditForm = () => {
                         margin="dense"
                         id="name"
                         label="Title"
-                        // fullWidth
                         variant="standard"
                     />
-                    <Select label="Reminder" onChange={(ev) => setReminder(ev.target.value)} value={reminder}>
+                    <Select sx={{ marginLeft: "15px" }} label="Reminder" onChange={(ev) => setReminder(ev.target.value)} value={reminder}>
                         <MenuItem value={0}><em>None</em></MenuItem>
                         <MenuItem value={1}>Urgent</MenuItem>
                         <MenuItem value={2}>Necessary</MenuItem>

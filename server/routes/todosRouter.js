@@ -2,10 +2,10 @@ const express = require("express");
 const router = express.Router();
 const { addData, delTodo, editTodo, getTodos } = require("../controllers/todosController");
 
-router.post("/:id", addData);
-router.delete("/:id", delTodo);
-router.patch("/:id", editTodo);
-router.get("/:id", getTodos);
+router.post("/add/:id", addData);
+router.delete("/del/:id1/:id2", delTodo);
+router.patch("/edit/:id", editTodo);
+router.get("/get/:id", getTodos);
 
 
 

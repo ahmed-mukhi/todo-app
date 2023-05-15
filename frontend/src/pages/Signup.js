@@ -10,30 +10,66 @@ import Container from '@mui/material/Container';
 import { registerUser } from '../controllers/userController';
 import { useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
+import Alert from '@mui/material/Alert';
 import { FormContext } from '../App';
 
 const SignUp = () => {
     const navigate = useNavigate();
     const { setUser } = useContext(FormContext);
-    const [fName, setFName] = useState("");
-    const [lName, setLName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPass] = useState("");
+    const [formData, setFormData] = useState({
+        fName: "",
+        lName: "",
+        email: "",
+        password: "",
+    });
+    const [formErrors, setFormErrors] = useState({});
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+
+    const validateForm = (status) => {
+        const errors = {};
+        if (!formData.email) {
+            errors.email = 'Email is required.';
+        }
+        if (!formData.password) {
+            errors.password = 'Password is required.';
+        }
+        if (!formData.fName) {
+            errors.fName = 'First Name is required.';
+        }
+        if (!formData.lName) {
+            errors.lName = 'Last Name is required.';
+        }
+        if (status) {
+            errors.status = "Email already exists";
+        }
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (fName === "" || lName === "" || email === "" || password === "") {
-            alert("later");
-        } else {
-            let resp = await registerUser(fName, lName, email, password);
-            console.log(resp);
-            // if (resp) {
-            //     setUser(resp);
-            //     navigate("/");
-            // }
-
-
+        if (validateForm()) {
+            let resp = await registerUser(formData.fName, formData.lName, formData.email, formData.password);
+            if (resp.error) {
+                console.log(resp);
+                validateForm(resp.error);
+            } else {
+                setUser(resp);
+                navigate("/");
+            }
         }
     };
+
 
     return (
         <Container component="main" maxWidth="xs">
@@ -50,39 +86,42 @@ const SignUp = () => {
                     Sign up
                 </Typography>
                 <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+                        {formErrors.status ? (<Alert sx={{ marginBottom : "15px",fontSize: "small" }} severity="error">{formErrors.status}</Alert>) : null}
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 autoComplete="given-name"
-                                name="firstName"
+                                name="fName"
                                 required
                                 fullWidth
-                                value={fName}
-                                onChange={(e) => setFName(e.target.value)}
+                                value={formData.fName}
+                                onChange={handleInputChange}
                                 variant='standard'
                                 id="firstName"
                                 label="First Name"
                                 autoFocus
                             />
+                            {formErrors.fName ? (<Alert sx={{ fontSize: "small" }} severity="error">{formErrors.fName}</Alert>) : null}
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
-                                required
                                 variant='standard'
-                                value={lName}
-                                onChange={(e) => setLName(e.target.value)}
+                                value={formData.lName}
+                                required
+                                onChange={handleInputChange}
                                 fullWidth
                                 id="lastName"
                                 label="Last Name"
-                                name="lastName"
+                                name="lName"
                                 autoComplete="family-name"
                             />
+                            {formErrors.lName ? (<Alert sx={{ fontSize: "small" }} severity="error">{formErrors.lName}</Alert>) : null}
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
                                 required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                value={formData.email}
+                                onChange={handleInputChange}
                                 variant='standard'
                                 fullWidth
                                 id="email"
@@ -90,12 +129,14 @@ const SignUp = () => {
                                 name="email"
                                 autoComplete="email"
                             />
+                            {formErrors.email ? (<Alert sx={{ fontSize: "small" }} severity="error">{formErrors.email}</Alert>) : null}
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
                                 required
-                                value={password}
-                                onChange={(e) => setPass(e.target.value)}
+                                autoFocus
+                                value={formData.password}
+                                onChange={handleInputChange}
                                 variant='standard'
                                 fullWidth
                                 name="password"
@@ -104,6 +145,7 @@ const SignUp = () => {
                                 id="password"
                                 autoComplete="new-password"
                             />
+                            {formErrors.password ? (<Alert sx={{ fontSize: "small" }} severity="error">{formErrors.password}</Alert>) : null}
                         </Grid>
                     </Grid>
                     <Button

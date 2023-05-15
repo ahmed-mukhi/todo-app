@@ -1,49 +1,50 @@
+import '../App.css';
 import React, { useEffect } from 'react';
-import { Grid } from '@mui/material';
-// import Avatar from '@mui/material/Avatar';
-import Chip from '@mui/material/Chip';
+import { Grid, Box, CircularProgress } from '@mui/material';
 import TodoForm from "../components/todoForm";
-import { Box } from "@mui/material";
 import ListFormat from '../components/listFormat';
 import { green } from '@mui/material/colors';
-import '../App.css';
 import { checkCurrUser } from '../controllers/userController';
 import { useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
+import PrimarySearchAppBar from '../components/profileNav';
 import { FormContext } from '../App';
 
 const Home = () => {
     const nav = useNavigate();
-    const { user, setUser } = useContext(FormContext);
+    const { setUser, user } = useContext(FormContext);
+
+    const checkUser = async () => {
+        try {
+            let resp = await checkCurrUser();
+            resp.error ? nav("/login") : setUser(resp);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     useEffect(() => {
-        checkCurrUser().then(rsp => {
-            console.log(rsp);
-            if (rsp.error === "Not found") {
-                nav("/login");
-            } else {
-                setUser(rsp);
-            }
-        });
+        checkUser();
     }, []);
 
 
 
     return (
         <Box sx={{ flexGrow: 1 }}>
-
-            <h1 style={{ color: green[900] }}>Recent todos</h1>
             <Grid container item xs={12} spacing={4}>
                 <Grid item xs={12} sm={12} lg={12}>
-                    <Chip label={`UserName : ${user.firstName}${user.lastName}`} />
+                    <PrimarySearchAppBar />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <ListFormat />
-                </Grid>
-                <Grid item xs={12} sm={6}>
+                    <h3 style={{ color: green[900], marginBottom: "20px" }}>Add todos</h3>
                     <TodoForm />
                 </Grid>
+                <Grid item xs={12} sm={6}>
+                    <h3 style={{ color: green[900], marginBottom: "20px" }}>Recent todos</h3>
+                    {user ? <ListFormat /> : <CircularProgress sx={{ marginLeft: "20px" }} color='success' />}
+                </Grid>
             </Grid>
-        </Box>
+        </Box >
     );
 };
 

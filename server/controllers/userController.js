@@ -10,20 +10,24 @@ const genToken = (id) => {
 const registerUser = async (req, res) => {
     try {
         let { firstName, lastName, email, password } = req.body;
-        console.log("ss");
         let salt = await bcrypt.genSalt();
         password = await bcrypt.hash(password, salt);
-        const user = await db.create({ firstName, lastName, email, password });
-        let token = genToken(user._id);
-        console.log(token);
-        res.cookie('token', token, { httpOnly: false, maxAge: expiry * 1000 });
-        if (user) {
-            res.status(200).json(user);
+        const checkEmail = await db.find({ email: email });
+        if (checkEmail.length) {
+            res.json({ error: "Email already exists" });
         } else {
-            res.status(400);
+            const user = await db.create({ firstName, lastName, email, password });
+            let token = genToken(user._id);
+            console.log(token);
+            res.cookie('token', token, { httpOnly: false, maxAge: expiry * 1000 });
+            if (user) {
+                res.status(200).json(user);
+            } else {
+                throw "no user created";
+            }
         }
     } catch (error) {
-        console.log(error);
+        res.json(error);
     }
 }
 
@@ -43,6 +47,15 @@ const currUser = async (req, res) => {
         } else {
             res.send({ error: "Invalid ID" });
         }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+const logOut = async (req, res) => {
+    try {
+        res.clearCookie("token");
+        res.json("Logged out success..");
     } catch (error) {
         console.log(error);
     }
@@ -70,4 +83,4 @@ const loginUser = async (req, res) => {
     }
 }
 
-module.exports = { loginUser, registerUser, currUser };
+module.exports = { loginUser, registerUser, currUser, logOut };

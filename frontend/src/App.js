@@ -13,9 +13,10 @@ function App() {
   const [id, setId] = useState("");
   const [reminder, setReminder] = useState(0);
   const [user, setUser] = useState("");
+  const [change, setChange] = useState(false);
 
   return (
-    <FormContext.Provider value={{ id, setId, open, setActive, setOpen, active, value, setValue, setReminder, reminder,user,setUser }}>
+    <FormContext.Provider value={{change,setChange, id, setId, open, setActive, setOpen, active, value, setValue, setReminder, reminder,user,setUser }}>
       <BrowserRouter>
         <div className="pages">
           <Routes>
