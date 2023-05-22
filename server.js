@@ -29,6 +29,20 @@ app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(myRoutes);
 
 
+<<<<<<< HEAD
+=======
+app.use(express.static(path.join(__dirname, "./frontend/build")));
+
+app.get("*", (_, res) => {
+    res.sendFile(
+        path.join(__dirname, "./frontend/build/index.html"),
+        (err) => {
+            res.status(500).send(err);
+        }
+    )
+});
+
+>>>>>>> eb7fbd319d534cc1a3b221d6c9bcfd9b55e6ae32
 mongoose.connect(process.env.MONG_URI).then(() => {
     try {
         console.log("mongoose connnected");
