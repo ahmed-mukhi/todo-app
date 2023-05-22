@@ -16,11 +16,11 @@ app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(myRoutes);
 
 
-app.use(express.static(path.join(__dirname, "./client/build")));
+app.use(express.static(path.join(__dirname, "./frontend/build")));
 
 app.get("*", (_, res) => {
     res.sendFile(
-        path.join(__dirname, "./client/build/index.html"),
+        path.join(__dirname, "./frontend/build/index.html"),
         (err) => {
             res.status(500).send(err);
         }
