@@ -25,7 +25,7 @@ app.get("*", (_, res) => {
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ credentials: true, origin: "*" }));
+app.use(cors({ credentials: true, origin: "https://nice-pear-adder-hem.cyclic.app" }));
 app.use(myRoutes);
 
 
