@@ -9,7 +9,6 @@ import {
     Checkbox,
     FormGroup,
     LinearProgress,
-    Grid
 }
     from '@mui/material';
 import { getTodos } from '../controllers/todosControllers';
