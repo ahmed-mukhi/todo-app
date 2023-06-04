@@ -6,13 +6,13 @@ headers.append('Content-Type', 'application/json');
 export const API = async (method, route, body) => {
     let resp;
     if (method === "GET" || method === "DELETE") {
-        resp = await fetch(`https://light-cloak-goat.cyclic.app:3000/${route}`, {
+        resp = await fetch(`http://localhost:4000/${route}`, {
             method: method,
             credentials: 'include',
             headers: headers
         });
     } else {
-        resp = await fetch(`https://light-cloak-goat.cyclic.app:3000/${route}`, {
+        resp = await fetch(`http://localhost:4000/${route}`, {
             method: method,
             credentials: 'include',
             headers: headers,

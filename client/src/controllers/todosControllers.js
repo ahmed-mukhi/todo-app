@@ -11,27 +11,26 @@ export async function getTodos(uid) {
     }
 }
 
-export async function DelTodos(id, uid) {
+export async function DelTodos(id) {
     try {
-        let data = await API("DELETE", `todo/del/${uid}/${id}`);
+        let data = await API("DELETE", `todo/del/${id}`);
         return data;
     } catch (error) {
         console.log(error);
     }
 }
 
-export async function EditTodos(id, title, reminder) {
+export async function EditTodos(id, obj) {
     try {
-        let data = await API("PATCH", `todo/edit/${id}`, { title, reminder });
-        console.log(data);
+        await API("PATCH", `todo/edit/${id}`, obj);
     } catch (error) {
         console.log(error);
     }
 }
 
-export async function SaveTodos(uid, title, reminder) {
+export async function SaveTodos(uid, obj) {
     try {
-        const data = await API("POST", `todo/add/${uid}`, { title, reminder });
+        const data = await API("POST", `todo/add/${uid}`, obj);
         return data;
     } catch (error) {
         console.log(error);

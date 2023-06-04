@@ -1,13 +1,12 @@
 import '../App.css';
 import React, { useEffect } from 'react';
-import { Grid, Box, CircularProgress } from '@mui/material';
-import TodoForm from "../components/todoForm";
-import ListFormat from '../components/listFormat';
-import { green } from '@mui/material/colors';
-import { checkCurrUser } from '../controllers/userController';
 import { useNavigate } from 'react-router-dom';
+import { Grid, Box, LinearProgress, Button } from '@mui/material';
+import { logOutUser } from '../controllers/userController';
+import ListFormat from '../components/listFormat';
+import { checkCurrUser } from '../controllers/userController';
 import { useContext } from 'react';
-import PrimarySearchAppBar from '../components/profileNav';
+import FilterAndSearch from '../components/FilterAndSearch';
 import { FormContext } from '../App';
 
 const Home = () => {
@@ -31,17 +30,38 @@ const Home = () => {
 
     return (
         <Box sx={{ flexGrow: 1 }}>
-            <Grid container item xs={12} spacing={4}>
-                <Grid item xs={12} sm={12} lg={12}>
-                    <PrimarySearchAppBar />
+            <Grid
+                container
+                item
+                xs={12}
+                spacing={4}>
+                <Grid
+                    container
+                    item
+                    xs={12}
+                    spacing={4}
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                >
+                    <Grid item>
+                        <h1>Dashboard</h1>
+                    </Grid>
+                    <Grid item>
+                        <Button variant='primary' color='secondary' onClick={() =>
+                            logOutUser().then((snap) => {
+                                if (snap) {
+                                    nav("/login");
+                                }
+                            })
+                        }>Log out</Button>
+                    </Grid>
                 </Grid>
-                <Grid item xs={12} sm={6}>
-                    <h3 style={{ color: green[900], marginBottom: "20px" }}>Add todos</h3>
-                    <TodoForm />
+                <Grid item xs={12} sm={12}>
+                    {user ? (<FilterAndSearch />) : <LinearProgress />}
                 </Grid>
-                <Grid item xs={12} sm={6}>
-                    <h3 style={{ color: green[900], marginBottom: "20px" }}>Recent todos</h3>
-                    {user ? <ListFormat /> : <CircularProgress sx={{ marginLeft: "20px" }} color='success' />}
+                <Grid item xs={12} sm={12}>
+                    {user ? <ListFormat /> : <LinearProgress sx={{ marginLeft: "20px" }} color='success' />}
                 </Grid>
             </Grid>
         </Box >
