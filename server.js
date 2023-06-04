@@ -8,6 +8,10 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const mongoose = require("mongoose");
 
+app.use(express.json());
+app.use(cookieParser());
+app.use(cors({ credentials: true, origin: "https://nice-pear-adder-hem.cyclic.app" }));
+app.use(myRoutes);
 
 app.use(express.static(path.join(__dirname, "./client/build")));
 
@@ -20,14 +24,6 @@ app.get("*", (_, res) => {
         }
     )
 });
-
-
-
-app.use(express.json());
-app.use(cookieParser());
-app.use(cors({ credentials: true, origin: "https://nice-pear-adder-hem.cyclic.app" }));
-app.use(myRoutes);
-
 
 
 mongoose.connect(process.env.MONG_URI).then(() => {
