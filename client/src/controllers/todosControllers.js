@@ -5,6 +5,7 @@ const { API } = require("../utils/apis");
 export async function getTodos(uid) {
     try {
         const data = await API('GET', `todo/get/${uid}`);
+        console.log(data);
         return data;
     } catch (error) {
         console.log(error.message);

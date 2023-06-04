@@ -43,6 +43,7 @@ export default function FilterAndSearch() {
 
     const createBackup = async () => {
         const resp = await getTodos(user._id);
+        console.log(resp);
         setBackup(resp.todos);
     }
 
