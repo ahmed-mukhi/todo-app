@@ -8,7 +8,7 @@ export const API = async (method, route, body) => {
     if (method === "GET" || method === "DELETE") {
         resp = await fetch(`/${route}`, {
             method: method,
-            credentials: 'include',
+            // credentials: 'include',
             headers: headers
         });
     } else {
