@@ -2,16 +2,17 @@ require("dotenv").config();
 const express = require("express");
 let path = require("path");
 const myRoutes = require("./routes/rootRouter");
-// const userRoutes = require("./routes/userRoutes");
 const app = express();
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const mongoose = require("mongoose");
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ credentials: true, origin: "https://nice-pear-adder-hem.cyclic.app" }));
 app.use(myRoutes);
+
 
 app.use(express.static(path.join(__dirname, "./client/build")));
 

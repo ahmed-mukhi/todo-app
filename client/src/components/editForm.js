@@ -60,7 +60,7 @@ const EditForm = ({ initialData, action }) => {
     const confirmTags = (tags) => {
         setTagArr([...tags]);
         const updated = tagsArr.filter(t => t.checked === true).map(t => t.title);
-        console.log(updated);
+        // console.log(updated);
         setFormData(prev => ({
             ...prev,
             tags: updated
@@ -70,23 +70,13 @@ const EditForm = ({ initialData, action }) => {
 
     const validateForm = () => {
         let errors = {};
-        let errField = "Fill in the required field";
-        console.log(formData);
-        if (formData.tags.length === 0) {
-            errors.tags = "Fill in atleast one tag";
-        }
-        if (!formData.title) {
-            errors.title = errField;
-        }
-        if (!formData.desc) {
-            errors.desc = errField;
-        }
-        if (!formData.assignedDate) {
-            errors.assDate = errField;
-        }
-        if (!formData.dueDate) {
-            errors.dueDate = errField;
-        }
+        Object.entries(formData).forEach(([key, value]) => {
+            if (value instanceof Array && value.length === 0) {
+                errors[key] = "Fill in atleast one tag";
+            } else if (!value && key !== "__v") {
+                errors[key] = "Fill in the required field";
+            }
+        })
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     }

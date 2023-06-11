@@ -1,6 +1,5 @@
 let headers = new Headers();
 headers.append('Content-Type', 'application/json');
-// headers.append('X-Auth-Token', 'application/json');
 
 
 export const API = async (method, route, body) => {

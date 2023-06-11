@@ -1,26 +1,33 @@
-import { useState } from 'react';
-import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
-import { Link } from 'react-router-dom';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import { registerUser } from '../controllers/userController';
-import { useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
-import Alert from '@mui/material/Alert';
+import { useState, useContext, useEffect } from 'react';
+import {
+    Button,
+    CssBaseline,
+    TextField,
+    Grid,
+    Box,
+    Typography,
+    Container,
+    Alert,
+    Input
+}
+    from '@mui/material';
+import { useNavigate, Link } from 'react-router-dom';
 import { FormContext } from '../App';
+
+const isEmail = (email) =>
+    /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email);
+
 
 const SignUp = () => {
     const navigate = useNavigate();
-    const { setUser } = useContext(FormContext);
+    const { setUser, user } = useContext(FormContext);
     const [formData, setFormData] = useState({
-        fName: "",
-        lName: "",
+        firstName: "",
+        lastName: "",
         email: "",
         password: "",
+        phone: "",
+        profileImage: null
     });
     const [formErrors, setFormErrors] = useState({});
 
@@ -35,39 +42,62 @@ const SignUp = () => {
 
     const validateForm = (status) => {
         const errors = {};
-        if (!formData.email) {
-            errors.email = 'Email is required.';
+        if (!status) {
+            Object.entries(formData).forEach(([key, value]) => {
+                if (!value) {
+                    errors[key] = `${key} is required`;
+                } else if (key === "email") {
+                    if (!isEmail(value)) {
+                        errors[key] = `Invalid format`;
+                    }
+                }
+            });
+        } else {
+            errors.status = status;
         }
-        if (!formData.password) {
-            errors.password = 'Password is required.';
-        }
-        if (!formData.fName) {
-            errors.fName = 'First Name is required.';
-        }
-        if (!formData.lName) {
-            errors.lName = 'Last Name is required.';
-        }
-        if (status) {
-            errors.status = "Email already exists";
-        }
-
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     };
 
 
+    const handleApi = async () => {
+        let form = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+            if (key === 'profileImage') {
+                form.append(key, value, value.name);
+            } else {
+                form.append(key, value);
+            }
+        });
+        let resp_1 = await fetch("/user/signup", {
+            method: "POST",
+            body: form,
+            credentials: "include"
+        });
+        return await resp_1.json();
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setFormErrors({});
         if (validateForm()) {
-            let resp = await registerUser(formData.fName, formData.lName, formData.email, formData.password);
+            let resp = await handleApi();
             if (resp.error) {
-                console.log(resp);
                 validateForm(resp.error);
             } else {
                 setUser(resp);
                 navigate("/");
             }
         }
+    };
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        setFormData((prev) => ({
+            ...prev,
+            profileImage: file
+        }));
+        console.log(file.name);
     };
 
 
@@ -85,68 +115,54 @@ const SignUp = () => {
                 <Typography sx={{ fontSize: "large" }}>
                     Sign up
                 </Typography>
-                <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-                        {formErrors.status ? (<Alert sx={{ marginBottom : "15px",fontSize: "small" }} severity="error">{formErrors.status}</Alert>) : null}
+                <Box component="form" noValidate onSubmit={handleSubmit} encType='multipart/form-data' sx={{ mt: 3 }}>
+                    {formErrors.status ? (<Alert sx={{ marginBottom: "15px", fontSize: "small" }} severity="error">{formErrors.status}</Alert>) : null}
                     <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                autoComplete="given-name"
-                                name="fName"
-                                required
-                                fullWidth
-                                value={formData.fName}
-                                onChange={handleInputChange}
-                                variant='standard'
-                                id="firstName"
-                                label="First Name"
-                                autoFocus
-                            />
-                            {formErrors.fName ? (<Alert sx={{ fontSize: "small" }} severity="error">{formErrors.fName}</Alert>) : null}
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                variant='standard'
-                                value={formData.lName}
-                                required
-                                onChange={handleInputChange}
-                                fullWidth
-                                id="lastName"
-                                label="Last Name"
-                                name="lName"
-                                autoComplete="family-name"
-                            />
-                            {formErrors.lName ? (<Alert sx={{ fontSize: "small" }} severity="error">{formErrors.lName}</Alert>) : null}
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                required
-                                value={formData.email}
-                                onChange={handleInputChange}
-                                variant='standard'
-                                fullWidth
-                                id="email"
-                                label="Email Address"
-                                name="email"
-                                autoComplete="email"
-                            />
-                            {formErrors.email ? (<Alert sx={{ fontSize: "small" }} severity="error">{formErrors.email}</Alert>) : null}
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                required
-                                autoFocus
-                                value={formData.password}
-                                onChange={handleInputChange}
-                                variant='standard'
-                                fullWidth
-                                name="password"
-                                label="Password"
-                                type="password"
-                                id="password"
-                                autoComplete="new-password"
-                            />
-                            {formErrors.password ? (<Alert sx={{ fontSize: "small" }} severity="error">{formErrors.password}</Alert>) : null}
-                        </Grid>
+                        {Object.entries(formData).map(([key, value], index) => (
+                            <Grid key={index} item xs={12} sm={(key === "firstName" || key === "lastName") ? 6 : 12}>
+                                {key === "profileImage" ?
+                                    (
+                                        <span>
+                                            <Input
+                                                type="file"
+                                                name="profileImage"
+                                                onChange={handleFileChange}
+                                                style={{ display: 'none' }}
+                                                id="file-input"
+                                            />
+                                            <label htmlFor="file-input">
+                                                <Button variant="contained" component="span">
+                                                    Upload File
+                                                </Button>
+                                            </label>
+                                            {formErrors.profileImage ? (<Alert sx={{ fontSize: "small" }} severity="error">{formErrors.profileImage}</Alert>) : (formData.profileImage ? " File added" : null)}
+                                        </span>
+                                    )
+                                    :
+                                    (
+                                        <span>
+                                            <TextField
+                                                name={key}
+                                                type={key === "password" ? key : "text"}
+                                                variant="standard"
+                                                required
+                                                fullWidth
+                                                value={value}
+                                                onChange={handleInputChange}
+                                                id={key}
+                                                label={key.charAt(0).toUpperCase() + key.slice(1)}
+                                                autoFocus
+                                            />
+                                            {formErrors.hasOwnProperty(key) ? (
+                                                <Alert sx={{ fontSize: "small" }} severity="error">
+                                                    {formErrors[key]}
+                                                </Alert>
+                                            ) : null}
+                                        </span>
+                                    )
+                                }
+                            </Grid>
+                        ))}
                     </Grid>
                     <Button
                         type="submit"

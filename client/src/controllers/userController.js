@@ -1,20 +1,15 @@
 
 const { API } = require("../utils/apis");
 
-export async function registerUser(f_name, l_name, email, pass) {
-    try {
-        const data = await API('POST', 'user/signup', {
-            firstName: f_name,
-            lastName: l_name,
-            email: email,
-            password: pass
-        });
-        return data;
+// export async function registerUser(obj) {
+//     try {
+//         // let data = await API('POST', 'user/signup', obj);
+//         // return data;
 
-    } catch (error) {
-        console.log(error);
-    }
-}
+//     } catch (error) {
+//         console.log(error);
+//     }
+// }
 
 export async function checkCurrUser() {
     try {
@@ -32,13 +27,9 @@ export async function logOutUser() {
     }
 }
 
-export async function LoginUser(email, pass) {
+export async function LoginUser(obj) {
     try {
-        const data = await API('POST', 'user/login', {
-            email: email,
-            password: pass
-        })
-        console.log(data);
+        const data = await API('POST', 'user/login', obj);
         return data;
     } catch (error) {
         console.log(error);

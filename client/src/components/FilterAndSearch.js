@@ -18,10 +18,9 @@ import { useContext } from 'react';
 import { FormContext } from '../App';
 
 export default function FilterAndSearch() {
-    const { status, setStatus, setData, setActive, setMethod, user, data } = useContext(FormContext);
+    const { status, setStatus, setData, setActive, setMethod, user, change } = useContext(FormContext);
     const [backup, setBackup] = useState([]);
     const [on, setOn] = useState(false);
-    // let nav = useNavigate();
 
     const handleFilterToggle = (ev, filterOption) => {
         if (ev.target.checked) {
@@ -30,6 +29,8 @@ export default function FilterAndSearch() {
             setStatus(status.filter(option => option !== filterOption));
         }
     };
+
+
 
     useEffect(() => {
         if (backup) {
@@ -43,13 +44,12 @@ export default function FilterAndSearch() {
 
     const createBackup = async () => {
         const resp = await getTodos(user._id);
-        console.log(resp);
         setBackup(resp.todos);
     }
 
     useEffect(() => {
         createBackup();
-    }, []);
+    }, [change]);
 
     useEffect(() => {
         setOn(true);

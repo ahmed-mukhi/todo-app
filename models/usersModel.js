@@ -19,7 +19,15 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
-    todos: [{ type: Schema.Types.ObjectId, ref: "todos"}]
+    phone: {
+        type: String,
+        required: true
+    },
+    todos: [{ type: Schema.Types.ObjectId, ref: "todos" }],
+    profileImage: {
+        type: String,
+        required: true
+    }
 }, { timestamps: true });
 
 

@@ -24,7 +24,7 @@ import EditForm from './editForm';
 import { useContext } from 'react';
 import { FormContext } from '../App';
 const ListFormat = () => {
-    const { method, setMethod, open, setOpen, setActive, setId, active, user, status, setChange, change, data, setData } = useContext(FormContext);
+    const { method, setMethod, open, setOpen, setActive, setId, active, user, setChange, change, data, setData } = useContext(FormContext);
     const [row, setRow] = useState({});
     const [sortBy, setSortBy] = useState('title');
     const [sortOrder, setSortOrder] = useState('asc');
@@ -67,6 +67,12 @@ const ListFormat = () => {
     };
 
     useEffect(() => {
+        if (backup) {
+            setChange(false);
+        }
+    }, [backup]);
+
+    useEffect(() => {
         if (data) {
             setBackup(data);
         }
@@ -78,12 +84,6 @@ const ListFormat = () => {
         Completed: green[300],
     };
 
-    const paginate = () => {
-        const startIndex = page * rowsPerPage;
-        const endIndex = startIndex + rowsPerPage;
-        return backup.slice(startIndex, endIndex);
-    }
-
     const setColor = (status) => {
         return statusColors[status] || grey[300];
     };
@@ -92,7 +92,6 @@ const ListFormat = () => {
     const fetchData = async (action) => {
         const resp = await getTodos(user._id);
         setData(resp.todos);
-        setChange(false);
     };
 
     const handleForm = (item) => {
@@ -117,7 +116,6 @@ const ListFormat = () => {
     }
 
     useEffect(() => {
-        setData([]);
         if (user || change) {
             setRow({});
             fetchData();
@@ -155,9 +153,9 @@ const ListFormat = () => {
                 action={action}
             />
 
-            {data !== [] ?
+            {backup ? (backup.length === 0 ? <h4>No todos yet</h4> :
                 (<TableContainer component={Paper}>
-                    <Table sx={{ '& .MuiTableCell-root': { padding: '8px' } }}>
+                    <Table sx={{ '& .MuiTableCell-root': { padding: '5px' } }}>
                         <TableHead>
                             <TableRow>
                                 <TableCell>
@@ -203,51 +201,53 @@ const ListFormat = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {!change && backup ? data
-                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map(item => {
-                                    return (
-                                        <TableRow
-                                            // hover
-                                            key={item._id}
-                                            sx={{ border: 0, backgroundColor: setColor(item.status) }}
-                                        >
-                                            <TableCell>{item.title}</TableCell>
-                                            <TableCell>{item.desc}</TableCell>
-                                            <TableCell>{item.status}</TableCell>
-                                            <TableCell>{new Date(item.assignedDate).toDateString()}</TableCell>
-                                            <TableCell>{new Date(item.dueDate).toDateString()}</TableCell>
-                                            <TableCell>
-                                                {item.tags.map((tag, index) => {
-                                                    return (
-                                                        <React.Fragment key={index}>
-                                                            {tag}
-                                                            {index !== item.tags.length - 1 && " , "}
-                                                        </React.Fragment>
-                                                    );
-                                                })}
-                                            </TableCell>
-                                            <TableCell>
-                                                <IconButton onClick={e => {
-                                                    handleForm(item);
-                                                }}>
-                                                    <EditIcon sx={{ ":hover": { color: "green" } }} />
-                                                </IconButton>
-                                            </TableCell>
-                                            <TableCell>
-                                                <IconButton onClick={(e) => handleDel(item._id)}>
-                                                    <DeleteIcon sx={{ ":hover": { color: "red" } }} />
-                                                </IconButton>
-                                            </TableCell>
-                                        </TableRow>
-                                    )
-                                }) : (
-                                <TableRow>
-                                    <TableCell colSpan={8}>
-                                        <LinearProgress />
-                                    </TableCell>
-                                </TableRow>
-                            )
+                            {!change && backup ?
+                                data
+                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                    .map(item => {
+                                        return (
+                                            <TableRow
+                                                // hover
+                                                key={item._id}
+                                                sx={{ border: 0, backgroundColor: setColor(item.status) }}
+                                            >
+                                                <TableCell>{item.title}</TableCell>
+                                                <TableCell>{item.desc}</TableCell>
+                                                <TableCell>{item.status}</TableCell>
+                                                <TableCell>{new Date(item.assignedDate).toDateString()}</TableCell>
+                                                <TableCell>{new Date(item.dueDate).toDateString()}</TableCell>
+                                                <TableCell>
+                                                    {item.tags.map((tag, index) => {
+                                                        return (
+                                                            <React.Fragment key={index}>
+                                                                {tag}
+                                                                {index !== item.tags.length - 1 && " , "}
+                                                            </React.Fragment>
+                                                        );
+                                                    })}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <IconButton onClick={e => {
+                                                        handleForm(item);
+                                                    }}>
+                                                        <EditIcon sx={{ ":hover": { color: "green" } }} />
+                                                    </IconButton>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <IconButton onClick={(e) => handleDel(item._id)}>
+                                                        <DeleteIcon sx={{ ":hover": { color: "red" } }} />
+                                                    </IconButton>
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    }) :
+                                <>
+                                    <TableRow>
+                                        <TableCell colSpan={8}>
+                                            <LinearProgress />
+                                        </TableCell>
+                                    </TableRow>
+                                </>
                             }
                         </TableBody>
                     </Table>
@@ -260,9 +260,8 @@ const ListFormat = () => {
                         onPageChange={handleChangePage}
                         onRowsPerPageChange={handleChangeRowsPerPage}
                     />
-                </TableContainer>
-                )
-                : (<LinearProgress />)
+                </TableContainer>))
+                : (change ? <LinearProgress /> : "")
             }
         </div>
     )
