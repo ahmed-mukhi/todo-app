@@ -46,8 +46,8 @@ const Home = () => {
 
     const fetch = async () => {
         const resp = await getTodos(user._id);
-        const image = fetch(`/${user.profileImage}`);
-        setImgUrl(image);
+        // const image = fetch(``);
+        setImgUrl(`https://todo-app-sqnm.vercel.app/${user.profileImage}`);
         setData(resp.todos);
     }
 
