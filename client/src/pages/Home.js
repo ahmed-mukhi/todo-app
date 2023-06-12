@@ -46,7 +46,7 @@ const Home = () => {
 
     const fetch = async () => {
         const resp = await getTodos(user._id);
-        setImgUrl(`https://todo-app-sqnm.vercel.app/${user.profileImage}`);
+        setImgUrl(`https://todo-mern-app-wine.vercel.app/${user.profileImage}`);
         setData(resp.todos);
     }
 
