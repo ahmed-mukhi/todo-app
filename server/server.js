@@ -8,7 +8,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(cors({ credentials: true, origin: "https://todo-app-rust-kappa.vercel.app/" }));
+app.use(cors({ credentials: true, origin: window.location.origin }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(myRoutes);
