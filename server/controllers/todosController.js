@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const db_todos = require("../models/todoModel");
-const db_users = require("../models/usersModel");
+const db_user = require("../models/usersModel");
 
 
 const addData = async (req, res) => {
@@ -11,7 +11,7 @@ const addData = async (req, res) => {
     }
     try {
         let todo = await db_todos.create({ ...req.body })
-        let resp = await db_users.findById(id);
+        let resp = await db_user.findById(id);
         resp.todos.push(todo);
         resp.save();
         res.status(200).json(resp);
@@ -23,7 +23,7 @@ const addData = async (req, res) => {
 const getTodos = async (req, res) => {
     try {
         const { id } = req.params;
-        db_users.findById(id).populate("todos").then((doc) => {
+        db_user.findById(id).populate("todos").then((doc) => {
             if (doc) {
                 res.status(200).json(doc);
             } else {
@@ -57,7 +57,7 @@ const delTodo = async (req, res) => {
             return res.status(400).json({ error: "Not found" });
         }
         await db_todos.findByIdAndDelete(id);
-        const userDoc = await db_users.updateMany({ todos: { $in: [id] } }, { $pull: { todos: id } });
+        const userDoc = await db_user.updateMany({ todos: { $in: [id] } }, { $pull: { todos: id } });
         if (userDoc) {
             res.json(userDoc);
         }
