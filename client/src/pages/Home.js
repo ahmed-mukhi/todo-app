@@ -73,7 +73,7 @@ const Home = () => {
                         alignItems="center"
                     >
                         <Grid item>
-                            <h2>Dashboard</h2>
+                            <h2>Dash</h2>
                         </Grid>
                         <Grid item>
                             <UserMenu user={user} imgUrl={imgUrl} handleLogout={handleLogout} />
