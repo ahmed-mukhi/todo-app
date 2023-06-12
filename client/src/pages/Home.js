@@ -46,6 +46,8 @@ const Home = () => {
 
     const fetch = async () => {
         const resp = await getTodos(user._id);
+        const image = fetch(`/${user.profileImage}`);
+        setImgUrl(image);
         setData(resp.todos);
     }
 
@@ -53,7 +55,6 @@ const Home = () => {
     useEffect(() => {
         if (user) {
             fetch();
-            setImgUrl("http://localhost:3000/" + user.profileImage);
         }
     }, [user, change]);
 
