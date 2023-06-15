@@ -2,6 +2,13 @@ const bcrypt = require("bcrypt");
 const db = require("../models/usersModel");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
+const cloudinary = require("cloudinary").v2;
+
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUD_API_KEY,
+    api_secret: process.env.CLOUD_API_SECRET
+})
 
 const expiry = 60 * 60 * 2;
 const genToken = (id) => {
@@ -10,14 +17,18 @@ const genToken = (id) => {
 
 const registerUser = async (req, res) => {
     try {
-        let { firstName, lastName, email, password, phone } = req.body;
+        let { firstName, lastName, email, password, phone, profileImage } = req.body;
         let salt = await bcrypt.genSalt();
         password = await bcrypt.hash(password, salt);
         const checkEmail = await db.find({ email: email });
         if (checkEmail.length) {
             res.json({ error: "Email already exists" });
         } else {
-            const user = await db.create({ phone, firstName, lastName, email, password, profileImage: req.file.path });
+            let fileResult = await cloudinary.uploader.upload(profileImage, {
+                folder: "userImages"
+            });
+            const { secure_url, public_id } = fileResult;
+            const user = await db.create({ phone, firstName, lastName, email, password, profileImage: { secure_url: secure_url, public_id: public_id } });
             let token = genToken(user._id);
             res.cookie('token', token, { httpOnly: false, maxAge: expiry * 1000 });
             if (user) {
@@ -37,7 +48,6 @@ const currUser = async (req, res) => {
         if (token) {
             jwt.verify(token, process.env.SECRET_TOKEN, async (err, docs) => {
                 if (err) {
-                    console.log(err.message);
                     res.send({ error: "Invalid ID" });
                 } else {
                     let user = await db.findById(docs.id);
@@ -85,21 +95,24 @@ const loginUser = async (req, res) => {
 
 const editUserDetails = async (req, res) => {
     try {
-        const { file } = req;
         const updateFields = req.body;
         const { id } = req.params;
         let user = await db.findById(id);
-        let prevImg = user.profileImage;
         if (user) {
-            if (file) {
-                fs.unlink(prevImg, err => {
-                    if (err) {
-                        console.error('Error deleting previous profile picture:', err);
-                    }
-                });
-                updateFields.profileImage = file.path;
+            if (updateFields.profileImage !== null) {
+                try {
+                    let delFile = await cloudinary.uploader.destroy(user.profileImage.public_id);
+                    console.log(delFile);
+                    let newFile = await cloudinary.uploader.upload(updateFields.profileImage, {
+                        folder: "userImages"
+                    });
+                    const { secure_url, public_id } = newFile;
+                    updateFields.profileImage = { secure_url, public_id }
+                } catch (error) {
+                    console.error(error);
+                }
             } else {
-                updateFields.profileImage = prevImg;
+                updateFields.profileImage = user.profileImage;
             }
             Object.entries(updateFields).forEach(([key, value]) => {
                 user[key] = value;

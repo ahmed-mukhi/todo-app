@@ -17,9 +17,9 @@ import AddIcon from '@mui/icons-material/Add';
 import { useContext } from 'react';
 import { FormContext } from '../App';
 
-export default function FilterAndSearch() {
+export default function FilterAndSearch({ todos }) {
     const { status, setStatus, setData, setActive, setMethod, user, change } = useContext(FormContext);
-    const [backup, setBackup] = useState([]);
+    const [backup, setBackup] = useState(todos);
     const [on, setOn] = useState(false);
 
     const handleFilterToggle = (ev, filterOption) => {

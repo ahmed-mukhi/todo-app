@@ -1,19 +1,27 @@
 
 const { API } = require("../utils/apis");
 
-// export async function registerUser(obj) {
-//     try {
-//         // let data = await API('POST', 'user/signup', obj);
-//         // return data;
-
-//     } catch (error) {
-//         console.log(error);
-//     }
-// }
-
-export async function checkCurrUser() {
+export async function registerUser(obj) {
     try {
-        return await API("POST", "user/currUser", {});
+        let data = await API('POST', 'user/signup', obj);
+        return data;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function editUserDetails(id, obj) {
+    try {
+        let data = await API('PATCH', `user/edit/${id}`, obj);
+        return data;
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+export async function checkCurrUser(signal) {
+    try {
+        return await API("POST", "user/currUser", {}, signal);
     } catch (error) {
         console.log(error.message);
     }

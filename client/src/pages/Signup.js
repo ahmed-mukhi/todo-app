@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext } from 'react';
 import {
     Button,
     CssBaseline,
@@ -8,11 +8,17 @@ import {
     Typography,
     Container,
     Alert,
-    Input
+    Input,
+    IconButton,
+    Avatar,
+    CircularProgress
 }
     from '@mui/material';
 import { useNavigate, Link } from 'react-router-dom';
+
+import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
 import { FormContext } from '../App';
+import { registerUser } from '../controllers/userController';
 
 const isEmail = (email) =>
     /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email);
@@ -20,7 +26,8 @@ const isEmail = (email) =>
 
 const SignUp = () => {
     const navigate = useNavigate();
-    const { setUser, user } = useContext(FormContext);
+    const { setUser } = useContext(FormContext);
+    const [change, setChange] = useState(false);
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -60,44 +67,40 @@ const SignUp = () => {
     };
 
 
-    const handleApi = async () => {
-        let form = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
-            if (key === 'profileImage') {
-                form.append(key, value, value.name);
-            } else {
-                form.append(key, value);
-            }
-        });
-        let resp_1 = await fetch("/user/signup", {
-            method: "POST",
-            body: form,
-            credentials: "include"
-        });
-        return await resp_1.json();
-    }
-
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        setFormErrors({});
-        if (validateForm()) {
-            let resp = await handleApi();
-            if (resp.error) {
-                validateForm(resp.error);
-            } else {
-                setUser(resp);
-                navigate("/");
+        try {
+            setChange(true);
+            e.preventDefault();
+            setFormErrors({});
+            if (validateForm()) {
+                let resp = await registerUser(formData);
+                if (resp.error && resp.error !== {}) {
+                    validateForm(resp.error);
+                    console.log(resp);
+                    throw resp.error;
+                } else {
+                    setUser(resp);
+                    navigate("/");
+                }
+                setChange(false);
             }
+        } catch (error) {
+            console.log(error);
         }
     };
 
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        setFormData((prev) => ({
-            ...prev,
-            profileImage: file
-        }));
-        console.log(file.name);
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        if (file) {
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                setFormData((prev) => ({
+                    ...prev,
+                    profileImage: event.target.result
+                }));
+            };
+        }
     };
 
 
@@ -112,76 +115,93 @@ const SignUp = () => {
                     alignItems: 'center',
                 }}
             >
-                <Typography sx={{ fontSize: "large" }}>
-                    Sign up
-                </Typography>
-                <Box component="form" noValidate onSubmit={handleSubmit} encType='multipart/form-data' sx={{ mt: 3 }}>
-                    {formErrors.status ? (<Alert sx={{ marginBottom: "15px", fontSize: "small" }} severity="error">{formErrors.status}</Alert>) : null}
-                    <Grid container spacing={2}>
-                        {Object.entries(formData).map(([key, value], index) => (
-                            <Grid key={index} item xs={12} sm={(key === "firstName" || key === "lastName") ? 6 : 12}>
-                                {key === "profileImage" ?
-                                    (
-                                        <span>
-                                            <Input
-                                                type="file"
-                                                name="profileImage"
-                                                onChange={handleFileChange}
-                                                style={{ display: 'none' }}
-                                                id="file-input"
-                                            />
-                                            <label htmlFor="file-input">
-                                                <Button variant="contained" component="span">
-                                                    Upload File
-                                                </Button>
-                                            </label>
-                                            {formErrors.profileImage ? (<Alert sx={{ fontSize: "small" }} severity="error">{formErrors.profileImage}</Alert>) : (formData.profileImage ? " File added" : null)}
-                                        </span>
-                                    )
-                                    :
-                                    (
-                                        <span>
-                                            <TextField
-                                                name={key}
-                                                type={key === "password" ? key : "text"}
-                                                variant="standard"
-                                                required
-                                                fullWidth
-                                                value={value}
-                                                onChange={handleInputChange}
-                                                id={key}
-                                                label={key.charAt(0).toUpperCase() + key.slice(1)}
-                                                autoFocus
-                                            />
-                                            {formErrors.hasOwnProperty(key) ? (
-                                                <Alert sx={{ fontSize: "small" }} severity="error">
-                                                    {formErrors[key]}
-                                                </Alert>
-                                            ) : null}
-                                        </span>
-                                    )
-                                }
+                {!change ?
+                    <div>
+                        <Typography sx={{ fontSize: "large",fontWeight:"bold" }}>
+                            Sign up
+                        </Typography>
+                        <Box component="form" noValidate onSubmit={handleSubmit} encType='multipart/form-data' sx={{ mt: 3 }}>
+                            {formErrors.status ? (<Alert sx={{ marginBottom: "15px", fontSize: "small" }} severity="error">{formErrors.status}</Alert>) : null}
+                            <Grid container spacing={2}>
+                                {Object.entries(formData).map(([key, value], index) => (
+                                    <Grid key={index} item xs={12} sm={(key === "firstName" || key === "lastName") ? 6 : 12}>
+                                        {key === "profileImage" ?
+                                            (
+                                                <span>
+                                                    <Input
+                                                        type="file"
+                                                        name="profileImage"
+                                                        onChange={handleFileChange}
+                                                        style={{ display: 'none' }}
+                                                        id="file-input"
+                                                    />
+                                                    <Grid container>
+                                                        <Grid item xs={6}>
+                                                            <IconButton>
+                                                                <label htmlFor="file-input">
+                                                                    {formData.profileImage ?
+                                                                        (
+                                                                            <Avatar src={formData.profileImage} />
+                                                                        )
+                                                                        :
+                                                                        (
+                                                                            <Avatar>
+                                                                                <AddPhotoAlternateOutlinedIcon />
+                                                                            </Avatar>
+                                                                        )
+                                                                    }
+                                                                </label>
+                                                            </IconButton>
+                                                        </Grid>
+                                                    </Grid>
+                                                    {formErrors.profileImage ? (<Alert sx={{ fontSize: "small" }} severity="error">{formErrors.profileImage}</Alert>) : null}
+                                                </span>
+                                            )
+                                            :
+                                            (
+                                                <span>
+                                                    <TextField
+                                                        name={key}
+                                                        type={key === "password" ? key : "text"}
+                                                        variant="standard"
+                                                        required
+                                                        fullWidth
+                                                        value={value}
+                                                        onChange={handleInputChange}
+                                                        id={key}
+                                                        label={key.charAt(0).toUpperCase() + key.slice(1)}
+                                                        autoFocus
+                                                    />
+                                                    {formErrors.hasOwnProperty(key) ? (
+                                                        <Alert sx={{ fontSize: "small" }} severity="error">
+                                                            {formErrors[key]}
+                                                        </Alert>
+                                                    ) : null}
+                                                </span>
+                                            )
+                                        }
+                                    </Grid>
+                                ))}
                             </Grid>
-                        ))}
-                    </Grid>
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
-                    >
-                        Sign Up
-                    </Button>
-                    <Grid container justifyContent="flex-end">
-                        <Grid item>
-                            <Link to="/login">
-                                Already have an account? Sign in
-                            </Link>
-                        </Grid>
-                    </Grid>
-                </Box>
+                            <Button
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                sx={{ mt: 3, mb: 2 }}
+                            >
+                                Sign Up
+                            </Button>
+                            <Grid container justifyContent="flex-end">
+                                <Grid item>
+                                    <Link to="/login">
+                                        Already have an account? Sign in
+                                    </Link>
+                                </Grid>
+                            </Grid>
+                        </Box>
+                    </div> : <CircularProgress />}
             </Box>
-        </Container>
+        </Container >
     );
 }
 

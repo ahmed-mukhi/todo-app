@@ -39,7 +39,8 @@ const EditForm = ({ initialData, action }) => {
             checked: false
         },
     ]);
-    const [formData, setFormData] = useState({});
+    const [formData, setFormData] = useState({
+    });
     const [formErrors, setFormErrors] = useState({});
 
     useEffect(() => {
@@ -47,10 +48,15 @@ const EditForm = ({ initialData, action }) => {
             if (initialData && action === "edit") {
                 setFormData(initialData);
                 checkTags(initialData.tags);
-            } else {
+            }
+            else {
                 setFormData({
                     tags: [],
-                    status: "Initial"
+                    status: "Initial",
+                    desc: "",
+                    title: "",
+                    dueDate: "",
+                    assignedDate: ""
                 });
             }
         }
@@ -60,7 +66,6 @@ const EditForm = ({ initialData, action }) => {
     const confirmTags = (tags) => {
         setTagArr([...tags]);
         const updated = tagsArr.filter(t => t.checked === true).map(t => t.title);
-        // console.log(updated);
         setFormData(prev => ({
             ...prev,
             tags: updated
@@ -102,8 +107,8 @@ const EditForm = ({ initialData, action }) => {
             [name]: value,
         }));
     };
-    const closeDialog = () => {
-        setChange(true);
+
+    const reset = () => {
         setTagArr([
             {
                 title: "Home",
@@ -122,9 +127,14 @@ const EditForm = ({ initialData, action }) => {
                 checked: false
             },
         ]);
-        setActive(false);
         setFormErrors({});
+        setActive(false);
         setId("");
+        setChange(true);
+
+    }
+    const closeDialog = () => {
+        setActive(false);
     };
     const dateFormat = (date) => {
         const formattedDate = new Date(date).toISOString().split('T')[0];
@@ -150,7 +160,7 @@ const EditForm = ({ initialData, action }) => {
                     await SaveTodos(user._id, formData);
                 }
                 setFormData({});
-                closeDialog();
+                reset();
             } else {
                 throw "VALIDATION_FAILED";
             }
@@ -251,7 +261,7 @@ const EditForm = ({ initialData, action }) => {
                                     onChange={handleChange}
                                     fullWidth
                                 />
-                                {formErrors.assDate ? <Alert severity='error' sx={{ fontSize: "small" }}>{formErrors.assDate}</Alert> : null}
+                                {formErrors.assignedDate ? <Alert severity='error' sx={{ fontSize: "small" }}>{formErrors.assignedDate}</Alert> : null}
                             </Grid>
                         </Grid>
                         <Grid container alignItems="center" spacing={2} sx={{ marginBottom: "20px" }}>

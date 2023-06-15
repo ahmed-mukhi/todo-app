@@ -23,12 +23,12 @@ import EditIcon from '@mui/icons-material/Edit';
 import EditForm from './editForm';
 import { useContext } from 'react';
 import { FormContext } from '../App';
-const ListFormat = () => {
+const ListFormat = ({ todos }) => {
     const { method, setMethod, open, setOpen, setActive, setId, active, user, setChange, change, data, setData } = useContext(FormContext);
     const [row, setRow] = useState({});
     const [sortBy, setSortBy] = useState('title');
     const [sortOrder, setSortOrder] = useState('asc');
-    const [backup, setBackup] = useState([]);
+    const [backup, setBackup] = useState(todos);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -155,7 +155,7 @@ const ListFormat = () => {
 
             {backup ? (backup.length === 0 ? <h4>No todos yet</h4> :
                 (<TableContainer component={Paper}>
-                    <Table sx={{ '& .MuiTableCell-root': { padding: '5px' } }}>
+                    <Table sx={{ '& .MuiTableCell-root': { padding: '3px' } }}>
                         <TableHead>
                             <TableRow>
                                 <TableCell>

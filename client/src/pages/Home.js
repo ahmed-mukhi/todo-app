@@ -17,6 +17,7 @@ const Home = () => {
     const { setUser, user, change } = useContext(FormContext);
     const [imgUrl, setImgUrl] = useState("");
     const [data, setData] = useState([]);
+    const [userChange, setUserChange] = useState(false);
 
     const handleLogout = async () => {
         let resp = await logOutUser();
@@ -25,15 +26,16 @@ const Home = () => {
         }
     }
 
-    const checkUser = async () => {
+    const checkUser = async (signal) => {
         try {
-            let resp = await checkCurrUser();
+            let resp = await checkCurrUser(signal);
 
             if (resp.error) {
                 nav("/login");
             } else {
-                resp.profileImage.replace('\\', '/');
+                setImgUrl(resp.profileImage);
                 setUser(resp);
+                setUserChange(false);
             }
         } catch (error) {
             console.log(error);
@@ -41,27 +43,33 @@ const Home = () => {
     }
 
     useEffect(() => {
-        checkUser();
-    }, []);
+        const abortControl = new AbortController();
+        const { signal } = abortControl;
+        checkUser(signal);
+
+        return () => {
+            abortControl.abort();
+        }
+    }, [userChange]);
 
     const fetch = async () => {
         const resp = await getTodos(user._id);
-        setImgUrl(`https://todo-mern-app-wine.vercel.app/${user.profileImage}`);
         setData(resp.todos);
     }
 
 
     useEffect(() => {
         if (user) {
+            console.log("reload");
             fetch();
         }
-    }, [user, change]);
+    }, [change]);
 
 
 
     return (
         <Box sx={{ flexGrow: 1 }}>
-            {user && imgUrl && data ?
+            {imgUrl && user && data ?
                 <Grid container item xs={12} spacing={4}>
                     <Grid
                         container
@@ -73,20 +81,22 @@ const Home = () => {
                         alignItems="center"
                     >
                         <Grid item>
-                            <h2>Dash</h2>
+                            <h2>Dashboard</h2>
                         </Grid>
                         <Grid item>
-                            <UserMenu user={user} imgUrl={imgUrl} handleLogout={handleLogout} />
+                            <UserMenu setUserChange={setUserChange} userChange={userChange} user={user} imgUrl={imgUrl} handleLogout={handleLogout} />
                         </Grid>
                     </Grid>
                     <Grid item xs={12} sm={12}>
-                        <FilterAndSearch />
+                        <FilterAndSearch todos={data} />
                     </Grid>
                     <Grid item xs={12} sm={8}>
-                        <ListFormat />
+                        <ListFormat todos={data} />
                     </Grid>
                     <Grid item xs={12} sm={4}>
-                        <TodosChart todos={data} />
+                        {data ?
+                            <TodosChart data={data} />
+                            : <CircularProgress />}
                     </Grid>
                 </Grid>
                 : <CircularProgress />}

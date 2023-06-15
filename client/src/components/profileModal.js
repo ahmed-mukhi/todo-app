@@ -1,19 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, IconButton, Input, TextField, Button, CircularProgress, Alert, LinearProgress } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, IconButton, Input, TextField, Button, Alert, LinearProgress } from '@mui/material';
 import { Grid, Card, CardMedia, Typography } from '@mui/material';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import EditIcon from '@mui/icons-material/Edit';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
+import { FormContext } from '../App';
+import { useContext } from 'react';
+import { editUserDetails } from '../controllers/userController';
 
 
 const isEmail = (email) =>
     /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email);
 
-const UserProfileModal = ({ open, handleClose, user, imgUrl }) => {
+const UserProfileModal = ({ open, handleClose, user, imgUrl, setUserChange }) => {
     const [editMode, setEditMode] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
-    const [change, setChange] = useState(false);
+    // const { setLoading, change } = useContext(FormContext);
+    const [loading, setLoading] = useState(false);
     const [upUser, setUpUser] = useState(user);
     const [formData, setFormData] = useState({
         firstName: "",
@@ -40,37 +44,20 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl }) => {
         return Object.keys(errors).length === 0;
     }
 
-    const handleApi = async () => {
-        let form = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
-            if (key === 'profileImage' && value !== null) {
-                form.append(key, value, value.name);
-            } else {
-                form.append(key, value);
-            }
-        });
-        let resp_1 = await fetch(`/user/edit/${user._id}`, {
-            method: "PATCH",
-            body: form,
-            credentials: "include"
-        });
-        return await resp_1.json();
-    }
-
     const onSubmit = async () => {
-        setChange(true);
+        setLoading(true);
         if (validateForm()) {
-            const resp = await handleApi();
+            const resp = await editUserDetails(user._id, formData);
             if (resp) {
                 setUpUser(resp);
                 setEditMode(false);
             }
         } else {
-            setChange(false);
+            setLoading(false);
         }
     };
 
-    useEffect(() => {
+    const backupFunc = () => {
         Object.entries(upUser).forEach(([key, value]) => {
             if (key !== "profileImage" && (key in formData)) {
                 setFormData(prev => ({
@@ -79,7 +66,12 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl }) => {
                 }))
             }
         });
-        setChange(false);
+    }
+
+    useEffect(() => {
+        setUserChange(true);
+        backupFunc();
+        setLoading(false);
     }, [upUser]);
 
     const handleInputChange = (e) => {
@@ -90,19 +82,17 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl }) => {
         }));
     };
 
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setImage(e.target.result);
-            };
-            reader.readAsDataURL(file);
-        }
-        setFormData((prev) => ({
-            ...prev,
-            profileImage: file
-        }));
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            setImage(event.target.result)
+            setFormData((prev) => ({
+                ...prev,
+                profileImage: event.target.result
+            }));
+        };
     };
 
     const handleMouseEnter = () => {
@@ -129,10 +119,13 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl }) => {
 
 
     return (
-        <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+        <Dialog open={open} onClose={() => {
+            setEditMode(false);
+            handleClose();
+        }} maxWidth="sm" fullWidth>
             <DialogTitle>User Profile</DialogTitle>
             <DialogContent>
-                {(!change && formData && upUser) ?
+                {(!loading && formData && upUser) ?
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6} md={4} lg={3}>
                             <Card
@@ -153,7 +146,7 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl }) => {
                                             opacity: 0.7,
                                         },
                                     }}
-                                    image={image ? image : imgUrl}
+                                    image={image ? image : imgUrl.secure_url}
                                 />
                                 {(isHovered && editMode) && (
                                     <>
@@ -263,6 +256,8 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl }) => {
                         <Grid item xs={12} sm={2} md={2} lg={2}>
                             {editMode ?
                                 <IconButton onClick={() => {
+                                    backupFunc();
+                                    setFormErrors({});
                                     setEditMode(false);
                                     setImage(null);
                                 }

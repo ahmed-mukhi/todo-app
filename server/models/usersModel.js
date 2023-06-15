@@ -25,8 +25,14 @@ const userSchema = new Schema({
     },
     todos: [{ type: Schema.Types.ObjectId, ref: "todos" }],
     profileImage: {
-        type: String,
-        required: true
+        secure_url: {
+            type: String,
+            required: true
+        },
+        public_id: {
+            type: String,
+            required: true
+        }
     }
 }, { timestamps: true });
 
