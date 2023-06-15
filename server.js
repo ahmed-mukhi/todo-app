@@ -14,11 +14,11 @@ app.use(cookieParser());
 app.use(myRoutes);
 
 
-app.use(express.static(path.join(__dirname, "../client/build")));
+app.use(express.static(path.join(__dirname, "./client/build")));
 
 app.get("*", (_, res) => {
     res.sendFile(
-        path.join(__dirname, "../client/build/index.html"),
+        path.join(__dirname, "./client/build/index.html"),
         (err) => {
             res.status(500).send("error is this one",err);
         }
