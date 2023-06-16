@@ -1,5 +1,5 @@
 import '../App.css';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Grid, Box, CircularProgress } from '@mui/material';
 import { logOutUser } from '../controllers/userController';
@@ -14,7 +14,7 @@ import { getTodos } from '../controllers/todosControllers';
 
 const Home = () => {
     const nav = useNavigate();
-    const { setUser, user, change } = useContext(FormContext);
+    const { setUser, user, change, setChange } = useContext(FormContext);
     const [imgUrl, setImgUrl] = useState("");
     const [data, setData] = useState([]);
     const [userChange, setUserChange] = useState(false);
@@ -26,6 +26,7 @@ const Home = () => {
         }
     }
 
+
     const checkUser = async (signal) => {
         try {
             let resp = await checkCurrUser(signal);
@@ -33,6 +34,7 @@ const Home = () => {
             if (resp.error) {
                 nav("/login");
             } else {
+                fetch(resp._id);
                 setImgUrl(resp.profileImage);
                 setUser(resp);
                 setUserChange(false);
@@ -45,23 +47,45 @@ const Home = () => {
     useEffect(() => {
         const abortControl = new AbortController();
         const { signal } = abortControl;
-        checkUser(signal);
-
+        checkCurrUser(signal).then(resp => {
+            if (resp.error) {
+                nav("/login");
+            } else {
+                fetch(resp._id);
+                setImgUrl(resp.profileImage);
+                setUser(resp);
+            }
+        })
         return () => {
             abortControl.abort();
-        }
-    }, [userChange]);
+        };
+    }, []);
 
-    const fetch = async () => {
-        const resp = await getTodos(user._id);
-        setData(resp.todos);
-    }
 
 
     useEffect(() => {
-        if (user) {
-            console.log("reload");
-            fetch();
+        const abortControl = new AbortController();
+        const { signal } = abortControl;
+
+        if (userChange) {
+            checkUser(signal);
+        }
+
+        return () => {
+            abortControl.abort();
+        };
+    }, [userChange]);
+
+    const fetch = async (id) => {
+        const resp = await getTodos(id);
+        setData(resp.todos);
+    }
+
+    useEffect(() => {
+        if (change && user) {
+            fetch(user._id).then(snap => {
+                setChange(false);
+            })
         }
     }, [change]);
 
@@ -69,7 +93,7 @@ const Home = () => {
 
     return (
         <Box sx={{ flexGrow: 1 }}>
-            {imgUrl && user && data ?
+            {user && data.length && !change ?
                 <Grid container item xs={12} spacing={4}>
                     <Grid
                         container
@@ -94,9 +118,7 @@ const Home = () => {
                         <ListFormat todos={data} />
                     </Grid>
                     <Grid item xs={12} sm={4}>
-                        {data ?
-                            <TodosChart data={data} />
-                            : <CircularProgress />}
+                        <TodosChart data={data} />
                     </Grid>
                 </Grid>
                 : <CircularProgress />}

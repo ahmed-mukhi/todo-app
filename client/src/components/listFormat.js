@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../App.css';
-import { DelTodos, getTodos } from '../controllers/todosControllers';
+import { DelTodos } from '../controllers/todosControllers';
 import {
     Snackbar,
     IconButton,
@@ -24,11 +24,11 @@ import EditForm from './editForm';
 import { useContext } from 'react';
 import { FormContext } from '../App';
 const ListFormat = ({ todos }) => {
-    const { method, setMethod, open, setOpen, setActive, setId, active, user, setChange, change, data, setData } = useContext(FormContext);
+    const { setData, method, setMethod, open, setOpen, setActive, setId, active, user, setChange, change, data } = useContext(FormContext);
     const [row, setRow] = useState({});
     const [sortBy, setSortBy] = useState('title');
     const [sortOrder, setSortOrder] = useState('asc');
-    const [backup, setBackup] = useState(todos);
+    // const [backup, setBackup] = useState(todos);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -66,17 +66,7 @@ const ListFormat = ({ todos }) => {
         setOpen(false);
     };
 
-    useEffect(() => {
-        if (backup) {
-            setChange(false);
-        }
-    }, [backup]);
 
-    useEffect(() => {
-        if (data) {
-            setBackup(data);
-        }
-    }, [data]);
 
     const statusColors = {
         Initial: grey[300],
@@ -89,10 +79,6 @@ const ListFormat = ({ todos }) => {
     };
 
 
-    const fetchData = async (action) => {
-        const resp = await getTodos(user._id);
-        setData(resp.todos);
-    };
 
     const handleForm = (item) => {
         setId(item._id);
@@ -116,11 +102,9 @@ const ListFormat = ({ todos }) => {
     }
 
     useEffect(() => {
-        if (user || change) {
-            setRow({});
-            fetchData();
-        }
-    }, [change]);
+        setRow({});
+        setData(todos);
+    }, [todos]);
 
 
     const handleChangeRowsPerPage = (event) => {
@@ -153,7 +137,7 @@ const ListFormat = ({ todos }) => {
                 action={action}
             />
 
-            {backup ? (backup.length === 0 ? <h4>No todos yet</h4> :
+            {data ? (data.length === 0 ? <h4>No todos yet</h4> :
                 (<TableContainer component={Paper}>
                     <Table sx={{ '& .MuiTableCell-root': { padding: '3px' } }}>
                         <TableHead>
@@ -201,7 +185,7 @@ const ListFormat = ({ todos }) => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {!change && backup ?
+                            {!change && todos ?
                                 data
                                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                     .map(item => {
@@ -267,4 +251,4 @@ const ListFormat = ({ todos }) => {
     )
 };
 
-export default ListFormat;
+export default React.memo(ListFormat);

@@ -8,6 +8,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 
 // app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+//
 app.use(cors({ credentials: true, origin: "https://drab-gray-rooster-hem.cyclic.app" }));
 app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());
@@ -20,7 +21,7 @@ app.get("*", (_, res) => {
     res.sendFile(
         path.join(__dirname, "./client/build/index.html"),
         (err) => {
-            res.status(500).send("error is this one",err);
+            res.status(500).send("error is this one", err);
         }
     )
 });

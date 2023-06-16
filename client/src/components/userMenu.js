@@ -5,7 +5,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 // import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import UserProfileModal from './profileModal';
 
-const UserMenu = ({ imgUrl, handleLogout, user, userChange,setUserChange }) => {
+const UserMenu = ({ imgUrl, handleLogout, user, userChange, setUserChange }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
 
@@ -26,8 +26,6 @@ const UserMenu = ({ imgUrl, handleLogout, user, userChange,setUserChange }) => {
     return (
         <div>
             <UserProfileModal setUserChange={setUserChange} handleClose={closeDialog} open={openDialog} user={user} imgUrl={imgUrl} />
-            {/* {!change ?
-                <span> */}
             <IconButton aria-describedby={id} onClick={handleClick}>
                 {!userChange ?
                     <Avatar src={imgUrl.secure_url} alt="P" />
@@ -64,8 +62,6 @@ const UserMenu = ({ imgUrl, handleLogout, user, userChange,setUserChange }) => {
                     </ListItem>
                 </List>
             </Popover>
-            {/* </span>
-                : <CircularProgress />} */}
         </div >
     )
 };

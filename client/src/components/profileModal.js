@@ -5,8 +5,6 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import EditIcon from '@mui/icons-material/Edit';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
-import { FormContext } from '../App';
-import { useContext } from 'react';
 import { editUserDetails } from '../controllers/userController';
 
 
@@ -16,7 +14,6 @@ const isEmail = (email) =>
 const UserProfileModal = ({ open, handleClose, user, imgUrl, setUserChange }) => {
     const [editMode, setEditMode] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
-    // const { setLoading, change } = useContext(FormContext);
     const [loading, setLoading] = useState(false);
     const [upUser, setUpUser] = useState(user);
     const [formData, setFormData] = useState({
@@ -28,6 +25,8 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl, setUserChange }) =>
     });
     const [image, setImage] = useState(null);
     const [formErrors, setFormErrors] = useState({});
+
+
 
     const validateForm = () => {
         let errors = {};
@@ -43,6 +42,7 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl, setUserChange }) =>
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     }
+
 
     const onSubmit = async () => {
         setLoading(true);
@@ -271,7 +271,7 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl, setUserChange }) =>
                             }
                         </Grid>
                     </Grid>
-                    : (<LinearProgress />)}
+                    : (<LinearProgress color="inherit"/>)}
             </DialogContent>
         </Dialog>
     );

@@ -11,14 +11,13 @@ import {
     LinearProgress,
 }
     from '@mui/material';
-import { getTodos } from '../controllers/todosControllers';
 import { Search as SearchIcon } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import { useContext } from 'react';
 import { FormContext } from '../App';
 
 export default function FilterAndSearch({ todos }) {
-    const { status, setStatus, setData, setActive, setMethod, user, change } = useContext(FormContext);
+    const { status, setStatus, setData, setActive, setMethod } = useContext(FormContext);
     const [backup, setBackup] = useState(todos);
     const [on, setOn] = useState(false);
 
@@ -42,14 +41,9 @@ export default function FilterAndSearch({ todos }) {
         }
     }, [status]);
 
-    const createBackup = async () => {
-        const resp = await getTodos(user._id);
-        setBackup(resp.todos);
-    }
-
     useEffect(() => {
-        createBackup();
-    }, [change]);
+        setBackup(todos);
+    }, [todos]);
 
     useEffect(() => {
         setOn(true);

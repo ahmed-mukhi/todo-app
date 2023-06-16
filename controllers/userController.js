@@ -101,8 +101,7 @@ const editUserDetails = async (req, res) => {
         if (user) {
             if (updateFields.profileImage !== null) {
                 try {
-                    let delFile = await cloudinary.uploader.destroy(user.profileImage.public_id);
-                    console.log(delFile);
+                    await cloudinary.uploader.destroy(user.profileImage.public_id);
                     let newFile = await cloudinary.uploader.upload(updateFields.profileImage, {
                         folder: "userImages"
                     });
