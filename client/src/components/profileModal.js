@@ -44,6 +44,12 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl, setUserChange }) =>
     }
 
 
+    useEffect(() => {
+        if (open) {
+            backupFunc();
+        }
+    }, [open]);
+
     const onSubmit = async () => {
         setLoading(true);
         if (validateForm()) {
@@ -69,6 +75,7 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl, setUserChange }) =>
     }
 
     useEffect(() => {
+        console.log("chala");
         setUserChange(true);
         backupFunc();
         setLoading(false);
@@ -271,7 +278,7 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl, setUserChange }) =>
                             }
                         </Grid>
                     </Grid>
-                    : (<LinearProgress color="inherit"/>)}
+                    : (<LinearProgress color="inherit" />)}
             </DialogContent>
         </Dialog>
     );
