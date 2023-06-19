@@ -8,7 +8,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 
 // app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-//
+//https://drab-gray-rooster-hem.cyclic.app
 app.use(cors({ credentials: true, origin: "https://drab-gray-rooster-hem.cyclic.app" }));
 app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());

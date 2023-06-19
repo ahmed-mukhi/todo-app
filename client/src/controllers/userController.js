@@ -19,9 +19,9 @@ export async function editUserDetails(id, obj) {
     }
 }
 
-export async function checkCurrUser(signal) {
+export async function checkCurrUser() {
     try {
-        return await API("POST", "user/currUser", {}, signal);
+        return await API("POST", "user/currUser", {});
     } catch (error) {
         console.log(error.message);
     }

@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import {
     Button,
     CssBaseline,
@@ -66,6 +66,10 @@ const SignUp = () => {
         return Object.keys(errors).length === 0;
     };
 
+    useEffect(() => {
+        setFormErrors({});
+    }, [formData])
+
 
     const handleSubmit = async (e) => {
         try {
@@ -82,8 +86,8 @@ const SignUp = () => {
                     setUser(resp);
                     navigate("/");
                 }
-                setChange(false);
             }
+            setChange(false);
         } catch (error) {
             console.log(error);
         }
@@ -117,7 +121,7 @@ const SignUp = () => {
             >
                 {!change ?
                     <div>
-                        <Typography sx={{ fontSize: "large",fontWeight:"bold" }}>
+                        <Typography sx={{ fontSize: "large", fontWeight: "bold" }}>
                             Sign up
                         </Typography>
                         <Box component="form" noValidate onSubmit={handleSubmit} encType='multipart/form-data' sx={{ mt: 3 }}>

@@ -52,13 +52,13 @@ const EditForm = ({ initialData, action }) => {
             }
             else {
                 setFormData({
-                    tags: [],
                     status: "Initial",
                     desc: "",
                     title: "",
                     dueDate: "",
                     assignedDate: ""
                 });
+                checkTags([]);
             }
         }
     }, [active]);
@@ -135,6 +135,7 @@ const EditForm = ({ initialData, action }) => {
 
     }
     const closeDialog = () => {
+        setFormErrors({});
         setActive(false);
     };
     const dateFormat = (date) => {
@@ -162,8 +163,6 @@ const EditForm = ({ initialData, action }) => {
                 }
                 setFormData({});
                 reset();
-            } else {
-                throw "VALIDATION_FAILED";
             }
         } catch (error) {
             console.log(error);

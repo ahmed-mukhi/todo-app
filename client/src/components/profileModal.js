@@ -11,11 +11,10 @@ import { editUserDetails } from '../controllers/userController';
 const isEmail = (email) =>
     /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email);
 
-const UserProfileModal = ({ open, handleClose, user, imgUrl, setUserChange }) => {
+const UserProfileModal = ({ open, handleClose, user, setUserChange }) => {
     const [editMode, setEditMode] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [upUser, setUpUser] = useState(user);
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -55,7 +54,7 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl, setUserChange }) =>
         if (validateForm()) {
             const resp = await editUserDetails(user._id, formData);
             if (resp) {
-                setUpUser(resp);
+                setUserChange(true);
                 setEditMode(false);
             }
         } else {
@@ -64,7 +63,7 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl, setUserChange }) =>
     };
 
     const backupFunc = () => {
-        Object.entries(upUser).forEach(([key, value]) => {
+        Object.entries(user).forEach(([key, value]) => {
             if (key !== "profileImage" && (key in formData)) {
                 setFormData(prev => ({
                     ...prev,
@@ -75,11 +74,9 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl, setUserChange }) =>
     }
 
     useEffect(() => {
-        console.log("chala");
-        setUserChange(true);
         backupFunc();
         setLoading(false);
-    }, [upUser]);
+    }, [user]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -132,7 +129,7 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl, setUserChange }) =>
         }} maxWidth="sm" fullWidth>
             <DialogTitle>User Profile</DialogTitle>
             <DialogContent>
-                {(!loading && formData && upUser) ?
+                {(!loading && formData && user) ?
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6} md={4} lg={3}>
                             <Card
@@ -153,7 +150,7 @@ const UserProfileModal = ({ open, handleClose, user, imgUrl, setUserChange }) =>
                                             opacity: 0.7,
                                         },
                                     }}
-                                    image={image ? image : imgUrl.secure_url}
+                                    image={image ? image : user.profileImage.secure_url}
                                 />
                                 {(isHovered && editMode) && (
                                     <>

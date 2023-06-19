@@ -15,7 +15,6 @@ import { getTodos } from '../controllers/todosControllers';
 const Home = () => {
     const nav = useNavigate();
     const { setUser, user, change, setChange } = useContext(FormContext);
-    const [imgUrl, setImgUrl] = useState("");
     const [data, setData] = useState([]);
     const [userChange, setUserChange] = useState(false);
 
@@ -27,53 +26,39 @@ const Home = () => {
     }
 
 
-    const checkUser = async (signal) => {
+    const checkUser = async (render) => {
         try {
-            let resp = await checkCurrUser(signal);
-
-            if (resp.error) {
-                nav("/login");
-            } else {
-                fetch(resp._id);
-                setImgUrl(resp.profileImage);
-                setUser(resp);
-                setUserChange(false);
+            let resp;
+            if (render === "first" || userChange) {
+                resp = await checkCurrUser();
             }
+
+            if (resp) {
+                const { _id, error } = resp;
+
+                if (error) {
+                    nav("/login");
+                } else {
+                    fetch(_id);
+                    setUser(resp);
+                }
+            }
+
+            setUserChange(false);
         } catch (error) {
             console.log(error);
         }
     }
 
+
     useEffect(() => {
-        const abortControl = new AbortController();
-        const { signal } = abortControl;
-        checkCurrUser(signal).then(resp => {
-            if (resp.error) {
-                nav("/login");
-            } else {
-                fetch(resp._id);
-                setImgUrl(resp.profileImage);
-                setUser(resp);
-            }
-        })
-        return () => {
-            abortControl.abort();
-        };
+        checkUser("first");
     }, []);
 
 
 
     useEffect(() => {
-        const abortControl = new AbortController();
-        const { signal } = abortControl;
-
-        if (userChange) {
-            checkUser(signal);
-        }
-
-        return () => {
-            abortControl.abort();
-        };
+        checkUser("");
     }, [userChange]);
 
     const fetch = async (id) => {
@@ -83,7 +68,7 @@ const Home = () => {
 
     useEffect(() => {
         if (change && user) {
-            fetch(user._id).then(snap => {
+            fetch(user._id).then(() => {
                 setChange(false);
             })
         }
@@ -108,7 +93,7 @@ const Home = () => {
                             <h2>Dashboard</h2>
                         </Grid>
                         <Grid item>
-                            <UserMenu setUserChange={setUserChange} userChange={userChange} user={user} imgUrl={imgUrl} handleLogout={handleLogout} />
+                            <UserMenu setUserChange={setUserChange} userChange={userChange} user={user} handleLogout={handleLogout} />
                         </Grid>
                     </Grid>
                     <Grid item xs={12} sm={12}>

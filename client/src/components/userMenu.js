@@ -2,10 +2,9 @@ import React, { useState } from 'react'
 import { IconButton, Popover, Avatar, List, ListItem, ListItemText, ListItemIcon, CircularProgress } from '@mui/material';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-// import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import UserProfileModal from './profileModal';
 
-const UserMenu = ({ imgUrl, handleLogout, user, userChange, setUserChange }) => {
+const UserMenu = ({ handleLogout, user, userChange, setUserChange }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
 
@@ -25,10 +24,10 @@ const UserMenu = ({ imgUrl, handleLogout, user, userChange, setUserChange }) => 
     const id = open ? 'simple-popover' : undefined;
     return (
         <div>
-            <UserProfileModal setUserChange={setUserChange} handleClose={closeDialog} open={openDialog} user={user} imgUrl={imgUrl} />
+            <UserProfileModal setUserChange={setUserChange} handleClose={closeDialog} open={openDialog} user={user} />
             <IconButton aria-describedby={id} onClick={handleClick}>
                 {!userChange ?
-                    <Avatar src={imgUrl.secure_url} alt="P" />
+                    <Avatar src={user.profileImage.secure_url} alt="P" />
                     :
                     <CircularProgress />
                 }

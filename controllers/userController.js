@@ -101,10 +101,10 @@ const editUserDetails = async (req, res) => {
         if (user) {
             if (updateFields.profileImage !== null) {
                 try {
-                    await cloudinary.uploader.destroy(user.profileImage.public_id);
                     let newFile = await cloudinary.uploader.upload(updateFields.profileImage, {
-                        folder: "userImages"
-                    });
+                        overwrite: true,
+                        public_id: user.profileImage.public_id
+                    })
                     const { secure_url, public_id } = newFile;
                     updateFields.profileImage = { secure_url, public_id }
                 } catch (error) {

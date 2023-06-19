@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Button,
     CssBaseline,
@@ -61,6 +61,11 @@ const Login = () => {
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     };
+
+
+    useEffect(() => {
+        setFormErrors({});
+    }, [formData])
 
 
     const handleSubmit = async (e) => {
