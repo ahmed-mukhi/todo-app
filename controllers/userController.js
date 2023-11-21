@@ -3,6 +3,7 @@ const db = require("../models/usersModel");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const cloudinary = require("cloudinary").v2;
+const axios = require("axios");
 
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
@@ -38,7 +39,7 @@ const registerUser = async (req, res) => {
             }
         }
     } catch (error) {
-        res.json(error);
+        res.status(500).json(error);
     }
 }
 
@@ -127,4 +128,18 @@ const editUserDetails = async (req, res) => {
     }
 }
 
-module.exports = { loginUser, registerUser, currUser, logOut, editUserDetails };
+
+const verifyCaptcha = async (req, res) => {
+    try {
+        const { val } = req.body;
+        const resp = await axios.post(`https://www.google.com/recaptcha/api/siteverify?secret=${process.env.CAPTCHA_SECRET_KEY}&response=${val}`);
+        const { data } = resp;
+        return res.json(data);
+    } catch (error) {
+        console.error(error);
+        res.status(400).json(error);
+    }
+}
+
+
+module.exports = { loginUser, registerUser, currUser, logOut, editUserDetails,verifyCaptcha };

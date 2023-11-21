@@ -1,5 +1,5 @@
 import '../App.css';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Grid, Box, CircularProgress } from '@mui/material';
 import { logOutUser } from '../controllers/userController';
@@ -28,10 +28,7 @@ const Home = () => {
 
     const checkUser = async (render) => {
         try {
-            let resp;
-            if (render === "first" || userChange) {
-                resp = await checkCurrUser();
-            }
+            let resp = await checkCurrUser();
 
             if (resp) {
                 const { _id, error } = resp;
@@ -49,11 +46,6 @@ const Home = () => {
             console.log(error);
         }
     }
-
-
-    useEffect(() => {
-        checkUser("first");
-    }, []);
 
 
 
@@ -78,7 +70,7 @@ const Home = () => {
 
     return (
         <Box sx={{ flexGrow: 1 }}>
-            {user && data.length && !change ?
+            {(user && data.length) || !change ?
                 <Grid container item xs={12} spacing={4}>
                     <Grid
                         container

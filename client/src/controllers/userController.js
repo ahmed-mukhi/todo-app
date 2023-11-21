@@ -27,6 +27,14 @@ export async function checkCurrUser() {
     }
 }
 
+export async function verifyCaptcha(val) {
+    try {
+        return await API("POST", "user/verify", { val });
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 export async function logOutUser() {
     try {
         return await API("GET", "user/logout");

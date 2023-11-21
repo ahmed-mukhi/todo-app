@@ -78,17 +78,18 @@ const SignUp = () => {
             setFormErrors({});
             if (validateForm()) {
                 let resp = await registerUser(formData);
-                if (resp.error && resp.error !== {}) {
+                if (resp.error) {
                     validateForm(resp.error);
-                    console.log(resp);
+                    setChange(false);
                     throw resp.error;
                 } else {
                     setUser(resp);
-                    navigate("/");
+                    navigate("/login");
                 }
             }
             setChange(false);
         } catch (error) {
+            setChange(false);
             console.log(error);
         }
     };

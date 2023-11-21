@@ -1,4 +1,4 @@
-const { registerUser, loginUser, currUser, logOut, editUserDetails } = require("../controllers/userController");
+const { registerUser, loginUser, currUser, logOut, editUserDetails, verifyCaptcha } = require("../controllers/userController");
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
@@ -24,6 +24,7 @@ const path = require("path");
 // const upload = multer({ storage: storage }).single("profileImage");
 
 
+router.post("/verify", verifyCaptcha);
 router.post("/signup", registerUser);
 router.post("/login", loginUser);
 router.get("/logout", logOut);

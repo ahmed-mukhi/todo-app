@@ -27,7 +27,7 @@ const UserMenu = ({ handleLogout, user, userChange, setUserChange }) => {
             <UserProfileModal setUserChange={setUserChange} handleClose={closeDialog} open={openDialog} user={user} />
             <IconButton aria-describedby={id} onClick={handleClick}>
                 {!userChange ?
-                    <Avatar src={user.profileImage.secure_url} alt="P" />
+                    <Avatar src={user?.profileImage?.secure_url} alt="P" />
                     :
                     <CircularProgress />
                 }

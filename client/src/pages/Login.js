@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
     Button,
     CssBaseline,
@@ -12,10 +12,11 @@ import {
     from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Link } from 'react-router-dom';
-import { LoginUser } from '../controllers/userController';
+import { LoginUser, verifyCaptcha } from '../controllers/userController';
 import { useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { FormContext } from '../App';
+import ReCAPTCHA from "react-google-recaptcha";
 
 
 
@@ -27,6 +28,7 @@ const isEmail = (email) =>
 
 const Login = () => {
     const nav = useNavigate();
+    const recaptcha = useRef();
     const { setUser } = useContext(FormContext);
     const [formData, setFormData] = useState({
         email: '',
@@ -43,8 +45,12 @@ const Login = () => {
         }));
     };
 
-    const validateForm = (status) => {
+    const validateForm = async (status) => {
         const errors = {};
+        const resp = await verifyCaptcha(recaptcha.current.getValue());
+        if (resp.success === "false" || recaptcha.current.getValue() === "") {
+            errors.captcha = "Verification by captcha failed !";
+        }
         if (!status) {
             Object.entries(formData).forEach(([key, value]) => {
                 if (!value) {
@@ -76,9 +82,9 @@ const Login = () => {
             if (data.status) {
                 validateForm(data.status);
             } else {
+                setUser(data);
                 nav("/");
             }
-            setUser(data);
         }
     };
 
@@ -116,6 +122,9 @@ const Login = () => {
                                 </span>
                             )
                         })}
+                        <br />
+                        <ReCAPTCHA ref={recaptcha} sitekey={process.env.REACT_APP_SITE_KEY} />
+                        {formErrors.hasOwnProperty("captcha") ? (<Alert sx={{ fontSize: "small" }} severity="error">{formErrors.captcha}</Alert>) : null}
                         <Button
                             type="submit"
                             fullWidth

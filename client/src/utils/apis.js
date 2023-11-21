@@ -10,10 +10,10 @@ export const API = async (method, route, body) => {
     };
 
     if (method === "GET" || method === "DELETE") {
-        resp = await fetch(`/${route}`, options);
+        resp = await fetch(`http://localhost:4000/${route}`, options);
     } else {
         options.body = JSON.stringify(body);
-        resp = await fetch(`/${route}`, options);
+        resp = await fetch(`http://localhost:4000/${route}`, options);
     }
 
     let data = await resp.json();
