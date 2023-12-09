@@ -12,9 +12,9 @@ import {
     from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Link } from 'react-router-dom';
-import { LoginUser, verifyCaptcha } from '../controllers/userController';
-import { useNavigate } from 'react-router-dom';
+import { LoginUser, verifyCaptcha, getQrCode } from '../controllers/userController';
 import { useContext } from 'react';
+import QRCodeModal from '../components/QrCodeModal';
 import { FormContext } from '../App';
 import ReCAPTCHA from "react-google-recaptcha";
 
@@ -27,9 +27,10 @@ const isEmail = (email) =>
     /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email);
 
 const Login = () => {
-    const nav = useNavigate();
     const recaptcha = useRef();
     const { setUser } = useContext(FormContext);
+    const [open, setOpen] = useState(false);
+    const [QrCode, setQrCodeImage] = useState("");
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -46,11 +47,7 @@ const Login = () => {
     };
 
     const validateForm = async (status) => {
-        const errors = {};
-        const resp = await verifyCaptcha(recaptcha.current.getValue());
-        if (resp.success === "false" || recaptcha.current.getValue() === "") {
-            errors.captcha = "Verification by captcha failed !";
-        }
+        let errors = {};
         if (!status) {
             Object.entries(formData).forEach(([key, value]) => {
                 if (!value) {
@@ -71,7 +68,18 @@ const Login = () => {
 
     useEffect(() => {
         setFormErrors({});
-    }, [formData])
+    }, [formData]);
+
+    const closeModal = () => {
+        setOpen(false);
+    }
+
+    const retryQrCode = async () => {
+        const newImage = await getQrCode();
+        if (newImage.success){
+            setQrCodeImage(newImage.image);
+        }
+    };
 
 
     const handleSubmit = async (e) => {
@@ -79,11 +87,16 @@ const Login = () => {
         setFormErrors({});
         if (validateForm()) {
             let data = await LoginUser(formData);
+            const resp = await verifyCaptcha(recaptcha.current.getValue());
+            if (resp.success === false) {
+                validateForm("ReCaptcha verification failed");
+            }
             if (data.status) {
                 validateForm(data.status);
             } else {
                 setUser(data);
-                nav("/");
+                await retryQrCode();
+                setOpen(true);
             }
         }
     };
@@ -105,6 +118,7 @@ const Login = () => {
                             return (
                                 <span key={index}>
                                     <TextField
+                                        sx={{ mb: 4 }}
                                         margin="normal"
                                         type={key === "password" ? key : "text"}
                                         variant="standard"
@@ -122,7 +136,6 @@ const Login = () => {
                                 </span>
                             )
                         })}
-                        <br />
                         <ReCAPTCHA ref={recaptcha} sitekey={process.env.REACT_APP_SITE_KEY} />
                         {formErrors.hasOwnProperty("captcha") ? (<Alert sx={{ fontSize: "small" }} severity="error">{formErrors.captcha}</Alert>) : null}
                         <Button
@@ -142,6 +155,7 @@ const Login = () => {
                         </Grid>
                     </Box>
                 </Box>
+                <QRCodeModal open={open} handleClose={closeModal} resend={retryQrCode} image={QrCode} />
             </Container>
         </ThemeProvider>
     );

@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const cloudinary = require("cloudinary").v2;
 const axios = require("axios");
+const qrcode = require("qrcode");
+const { authenticator } = require("otplib");
 
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
@@ -15,6 +17,50 @@ const expiry = 60 * 60 * 2;
 const genToken = (id) => {
     return jwt.sign({ id }, process.env.SECRET_TOKEN, { expiresIn: expiry });
 }
+
+
+
+const genQrCode = async (req, res) => {
+    try {
+        let token = req.cookies.token;
+        jwt.verify(token, process.env.SECRET_TOKEN, async (err, docs) => {
+            if (!err) {
+                let secret = authenticator.generateSecret();
+                const uri = authenticator.keyuri(docs.id, "NCYS PROJECT BCY-3A", secret);
+                const image = await qrcode.toDataURL(uri);
+                await db.findByIdAndUpdate(docs.id, { secret });
+                res.status(200).send({ success: "Generated QR Code Successfully", image });
+            } else {
+                throw "Not Completed First Step Auth YEt";
+            }
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ error });
+    }
+}
+
+
+const verifyQrImage = async (req, res) => {
+    try {
+        const { code } = req.query;
+        let token = req.cookies.token;
+        jwt.verify(token, process.env.SECRET_TOKEN, async (err, docs) => {
+            if (!err) {
+                const user = await db.findById(docs.id);
+                const storedCode = user.secret;
+                console.log(storedCode);
+                let result = authenticator.check(code, storedCode);
+                console.log(result);
+                res.send({ success: result });
+            }
+        });
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 
 const registerUser = async (req, res) => {
     try {
@@ -142,4 +188,4 @@ const verifyCaptcha = async (req, res) => {
 }
 
 
-module.exports = { loginUser, registerUser, currUser, logOut, editUserDetails,verifyCaptcha };
+module.exports = { loginUser, registerUser, currUser, logOut, editUserDetails, verifyCaptcha, genQrCode, verifyQrImage };

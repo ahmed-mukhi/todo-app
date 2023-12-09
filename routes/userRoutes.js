@@ -1,30 +1,11 @@
-const { registerUser, loginUser, currUser, logOut, editUserDetails, verifyCaptcha } = require("../controllers/userController");
+const { registerUser, loginUser, currUser, logOut, editUserDetails, verifyCaptcha, genQrCode,verifyQrImage } = require("../controllers/userController");
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
-const path = require("path");
-
-// const storage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, "uploads");
-//     },
-//     filename: (req, file, cb) => {
-//         console.log(file);
-//         cb(null, Date.now() + path.extname(file.originalname));
-//     },
-//     fileFilter: (req, file, cb) => {
-//         if (file) {
-//             cb(null, true);
-//         } else {
-//             cb(null, false);
-//         }
-//     },
-// });
-
-// const upload = multer({ storage: storage }).single("profileImage");
 
 
 router.post("/verify", verifyCaptcha);
+router.get("/getQrImage", genQrCode);
+router.get("/verifyQrImage", verifyQrImage);
 router.post("/signup", registerUser);
 router.post("/login", loginUser);
 router.get("/logout", logOut);

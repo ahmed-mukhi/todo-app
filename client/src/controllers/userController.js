@@ -35,6 +35,22 @@ export async function verifyCaptcha(val) {
     }
 }
 
+export async function verifyQrCode(code) {
+    try {
+        return await API("GET", `user/verifyQrImage?code=${code}`, {});
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+export async function getQrCode() {
+    try {
+        return await API("GET", `user/getQrImage`, {});
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 export async function logOutUser() {
     try {
         return await API("GET", "user/logout");
